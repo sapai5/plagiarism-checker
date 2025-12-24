@@ -25,7 +25,7 @@ Similarity is calculated using SequenceMatcher on the normalized code.
 ## Features
 
 - **Structural comparison** — Catches plagiarism even when variables are renamed
-- **Tag-based organization** — Group submissions by class/assignment (e.g., `cse330-hw5`)
+- **Tag-based organization** — Group submissions by class/assignment (e.g., `cse3301-hw5`)
 - **Batch analysis** — Compare all submissions against each other with one click
 - **Suspicious pattern detection** — Flags identical string literals and code blocks
 - **Web interface** — Easy-to-use frontend for all operations
