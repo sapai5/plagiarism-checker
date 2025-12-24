@@ -7,11 +7,11 @@ C++ plagiarism detector using Tree-sitter AST parsing. Structurally normalizes c
 The tool parses C++ code into an Abstract Syntax Tree, then normalizes it by replacing all identifiers with a generic `ID` token. This means code that's copied and has variables renamed will still produce identical normalized output:
 
 ```cpp
-// Original                          // "Disguised" copy
-map<string, vector<Rule>> nt_rules;  map<string, vector<Rule>> rulesByNT;
-for (const auto& rule : rules) {     for (const auto& r : rules) {
-    nt_rules[rule.lhs].push_back(rule);  rulesByNT[r.lhs].push_back(r);
-}                                    }
+// Original                                  // "Disguised" copy
+map<string, vector<Rule>> nt_rules;          map<string, vector<Rule>> rulesByNT;
+for (const auto& rule : rules) {             for (const auto& r : rules) {
+    nt_rules[rule.lhs].push_back(rule);          rulesByNT[r.lhs].push_back(r);
+}                                            }
 
 // Both normalize to:
 map<string, vector<ID>> ID;
