@@ -40,24 +40,90 @@
             margin-bottom: 2rem;
         }
 
-        .code-panels {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
             margin-bottom: 1.5rem;
+            border-bottom: 1px solid #313244;
+            padding-bottom: 0.5rem;
         }
 
-        @media (max-width: 900px) {
-            .code-panels {
+        .tab {
+            padding: 0.75rem 1.5rem;
+            background: transparent;
+            border: none;
+            color: #a1a1aa;
+            cursor: pointer;
+            font-size: 0.95rem;
+            border-radius: 6px 6px 0 0;
+            transition: all 0.2s;
+        }
+
+        .tab:hover {
+            color: #e4e4e7;
+            background: #313244;
+        }
+
+        .tab.active {
+            color: #60a5fa;
+            background: #313244;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Forms and inputs */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #cdd6f4;
+        }
+
+        input[type="text"], select {
+            width: 100%;
+            padding: 0.75rem;
+            background: #11111b;
+            border: 1px solid #313244;
+            border-radius: 6px;
+            color: #cdd6f4;
+            font-size: 1rem;
+        }
+
+        input[type="text"]:focus, select:focus {
+            outline: none;
+            border-color: #60a5fa;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
                 grid-template-columns: 1fr;
             }
         }
 
+        /* Panels */
         .panel {
             background: #1e1e2e;
             border-radius: 12px;
             padding: 1rem;
             border: 1px solid #313244;
+            margin-bottom: 1.5rem;
         }
 
         .panel-header {
@@ -68,15 +134,6 @@
             padding-bottom: 0.75rem;
             border-bottom: 1px solid #313244;
         }
-
-        .panel-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-        }
-
-        .panel:first-child .panel-dot { background: #f472b6; }
-        .panel:last-child .panel-dot { background: #34d399; }
 
         .panel-title {
             font-weight: 600;
@@ -102,9 +159,9 @@
             border-color: #60a5fa;
         }
 
+        /* Buttons */
         .button-row {
             display: flex;
-            justify-content: center;
             gap: 1rem;
             margin-bottom: 1.5rem;
         }
@@ -119,40 +176,41 @@
             transition: all 0.2s;
         }
 
-        .check-btn {
+        .primary-btn {
             background: linear-gradient(135deg, #60a5fa, #a78bfa);
             color: white;
         }
 
-        .check-btn:hover:not(:disabled) {
+        .primary-btn:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 4px 20px rgba(96, 165, 250, 0.4);
         }
 
-        .check-btn:disabled {
+        .primary-btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
         }
 
-        .clear-btn {
+        .secondary-btn {
             background: #313244;
             color: #cdd6f4;
         }
 
-        .clear-btn:hover {
+        .secondary-btn:hover {
             background: #45475a;
         }
 
+        .danger-btn {
+            background: #f87171;
+            color: white;
+        }
+
+        /* Results */
         .results {
             background: #1e1e2e;
             border-radius: 12px;
             padding: 1.5rem;
             border: 1px solid #313244;
-            display: none;
-        }
-
-        .results.visible {
-            display: block;
         }
 
         .score-display {
@@ -163,14 +221,14 @@
         }
 
         .score-circle {
-            width: 150px;
-            height: 150px;
+            width: 120px;
+            height: 120px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             margin: 0 auto 1rem;
-            font-size: 2.5rem;
+            font-size: 2rem;
             font-weight: 700;
         }
 
@@ -183,158 +241,77 @@
         .verdict {
             font-size: 1.25rem;
             font-weight: 600;
-            margin-bottom: 0.5rem;
         }
 
-        .verdict-desc {
-            color: #a1a1aa;
+        /* Match table */
+        .match-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
         }
 
-        .details-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
+        .match-table th, .match-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #313244;
         }
 
-        @media (max-width: 900px) {
-            .details-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .detail-section {
+        .match-table th {
             background: #11111b;
-            border-radius: 8px;
-            padding: 1rem;
-        }
-
-        .detail-section h3 {
-            font-size: 0.9rem;
             color: #a1a1aa;
-            margin-bottom: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .normalized-code {
-            font-family: 'Fira Code', monospace;
-            font-size: 12px;
-            line-height: 1.5;
-            white-space: pre-wrap;
-            max-height: 250px;
-            overflow-y: auto;
-            color: #89b4fa;
-        }
-
-        .diff-view {
-            background: #11111b;
-            padding: 1rem;
-            margin: 0;
-            border-radius: 6px;
-            font-family: 'Fira Code', monospace;
-            font-size: 12px;
-            line-height: 1.6;
-            overflow-x: auto;
-            white-space: pre;
-        }
-
-        .diff-header {
-            color: #cdd6f4;
-            font-weight: bold;
-        }
-
-        .diff-range {
-            color: #89b4fa;
-        }
-
-        .diff-add {
-            color: #a6e3a1;
-            background: rgba(166, 227, 161, 0.1);
-            display: block;
-        }
-
-        .diff-remove {
-            color: #f38ba8;
-            background: rgba(243, 139, 168, 0.1);
-            display: block;
-        }
-
-        .diff-context {
-            color: #6c7086;
-        }
-
-        .suspicious-section {
-            background: rgba(248, 113, 113, 0.1);
-            border: 1px solid #f87171;
-        }
-
-        .suspicious-section h3 {
-            color: #f87171;
-            margin-bottom: 1rem;
-        }
-
-        .suspicious-group {
-            margin-bottom: 1rem;
-        }
-
-        .suspicious-group h4 {
-            color: #fca5a5;
+            font-weight: 600;
             font-size: 0.85rem;
-            margin-bottom: 0.5rem;
         }
 
-        .suspicious-items {
+        .match-table tr:hover {
+            background: #313244;
+        }
+
+        .score-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .badge-critical { background: #f87171; color: #1e1e2e; }
+        .badge-high { background: #fb923c; color: #1e1e2e; }
+        .badge-medium { background: #facc15; color: #1e1e2e; }
+        .badge-low { background: #4ade80; color: #1e1e2e; }
+
+        /* Tags list */
+        .tags-list {
             display: flex;
             flex-wrap: wrap;
             gap: 0.5rem;
-        }
-
-        .suspicious-string {
-            background: #313244;
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            font-size: 11px;
-            color: #f9e2af;
-            max-width: 100%;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .suspicious-block {
-            background: #1e1e2e;
-            padding: 0.75rem;
-            border-radius: 6px;
-            font-size: 11px;
-            margin-bottom: 0.5rem;
-            overflow-x: auto;
-            border-left: 3px solid #f87171;
-        }
-
-        .stats {
-            display: flex;
-            gap: 2rem;
-            justify-content: center;
             margin-top: 1rem;
-            padding-top: 1rem;
-            border-top: 1px solid #313244;
         }
 
-        .stat {
-            text-align: center;
+        .tag-item {
+            background: #313244;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
         }
 
-        .stat-value {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #60a5fa;
+        .tag-item:hover {
+            background: #45475a;
         }
 
-        .stat-label {
+        .tag-count {
+            background: #60a5fa;
+            color: #1e1e2e;
+            padding: 0.1rem 0.5rem;
+            border-radius: 10px;
             font-size: 0.8rem;
-            color: #a1a1aa;
+            font-weight: 600;
         }
 
+        /* Loading & messages */
         .loading {
             display: flex;
             align-items: center;
@@ -357,183 +334,245 @@
             to { transform: rotate(360deg); }
         }
 
-        .error {
-            background: #f871711a;
+        .success-msg {
+            background: rgba(74, 222, 128, 0.1);
+            border: 1px solid #4ade80;
+            color: #4ade80;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .error-msg {
+            background: rgba(248, 113, 113, 0.1);
             border: 1px solid #f87171;
             color: #fca5a5;
             padding: 1rem;
             border-radius: 8px;
+            margin-bottom: 1rem;
         }
 
-        .toggle-btn {
-            background: #313244;
-            color: #cdd6f4;
-            padding: 0.5rem 1rem;
-            font-size: 0.85rem;
-            margin-top: 0.5rem;
+        .info-box {
+            background: #11111b;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
+        .info-box h4 {
+            color: #60a5fa;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Two column compare */
+        .code-panels {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 900px) {
+            .code-panels {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot-pink { background: #f472b6; }
+        .dot-green { background: #34d399; }
+
+        /* Diff view */
+        .diff-view {
+            background: #11111b;
+            padding: 1rem;
+            margin: 0;
+            border-radius: 6px;
+            font-family: 'Fira Code', monospace;
+            font-size: 12px;
+            line-height: 1.6;
+            overflow-x: auto;
+            white-space: pre;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .diff-add { color: #a6e3a1; background: rgba(166, 227, 161, 0.1); display: block; }
+        .diff-remove { color: #f38ba8; background: rgba(243, 139, 168, 0.1); display: block; }
+        .diff-context { color: #6c7086; }
+
+        .detail-section {
+            background: #11111b;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .detail-section h3 {
+            font-size: 0.9rem;
+            color: #a1a1aa;
+            margin-bottom: 0.75rem;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Code Plagiarism Checker</h1>
-        <p class="subtitle">Paste two C++ code samples to analyze structural similarity</p>
+        <p class="subtitle">Compare code samples or check against a database of submissions</p>
 
-        <div class="code-panels">
-            <div class="panel">
-                <div class="panel-header">
-                    <div class="panel-dot"></div>
-                    <span class="panel-title">Code Sample 1</span>
-                </div>
-                <textarea id="code1" placeholder="Paste first code sample here..."></textarea>
-            </div>
-            <div class="panel">
-                <div class="panel-header">
-                    <div class="panel-dot"></div>
-                    <span class="panel-title">Code Sample 2</span>
-                </div>
-                <textarea id="code2" placeholder="Paste second code sample here..."></textarea>
-            </div>
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('compare')">Quick Compare</button>
+            <button class="tab" onclick="showTab('submit')">Submit Code</button>
+            <button class="tab" onclick="showTab('check')">Check Against Tag</button>
+            <button class="tab" onclick="showTab('batch')">Batch Analysis</button>
+            <button class="tab" onclick="showTab('manage')">Manage Tags</button>
         </div>
 
-        <div class="button-row">
-            <button class="check-btn" id="checkBtn" onclick="checkPlagiarism()">
-                Check for Plagiarism
-            </button>
-            <button class="clear-btn" onclick="clearAll()">Clear All</button>
+        <!-- Quick Compare Tab -->
+        <div id="compare-tab" class="tab-content active">
+            <div class="code-panels">
+                <div class="panel">
+                    <div class="panel-header">
+                        <div class="panel-dot dot-pink"></div>
+                        <span class="panel-title">Code Sample 1</span>
+                    </div>
+                    <textarea id="code1" placeholder="Paste first code sample here..."></textarea>
+                </div>
+                <div class="panel">
+                    <div class="panel-header">
+                        <div class="panel-dot dot-green"></div>
+                        <span class="panel-title">Code Sample 2</span>
+                    </div>
+                    <textarea id="code2" placeholder="Paste second code sample here..."></textarea>
+                </div>
+            </div>
+            <div class="button-row">
+                <button class="primary-btn" onclick="quickCompare()">Compare</button>
+                <button class="secondary-btn" onclick="clearCompare()">Clear</button>
+            </div>
+            <div id="compare-results"></div>
         </div>
 
-        <div class="results" id="results"></div>
+        <!-- Submit Code Tab -->
+        <div id="submit-tab" class="tab-content">
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title">Submit Code to Database</span>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Tag (e.g., cse330-hw5)</label>
+                        <input type="text" id="submit-tag" placeholder="cse330-hw5">
+                    </div>
+                    <div class="form-group">
+                        <label>Student ID</label>
+                        <input type="text" id="submit-student" placeholder="1234567890">
+                    </div>
+                    <div class="form-group">
+                        <label>Filename</label>
+                        <input type="text" id="submit-filename" placeholder="main.cpp">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Code</label>
+                    <textarea id="submit-code" placeholder="Paste code here..."></textarea>
+                </div>
+            </div>
+            <div class="button-row">
+                <button class="primary-btn" onclick="submitCode()">Submit</button>
+            </div>
+            <div id="submit-results"></div>
+        </div>
+
+        <!-- Check Against Tag Tab -->
+        <div id="check-tab" class="tab-content">
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title">Check Code Against All Submissions with Tag</span>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Tag</label>
+                        <input type="text" id="check-tag" placeholder="cse330-hw5">
+                    </div>
+                    <div class="form-group">
+                        <label>Student ID (optional, excludes self)</label>
+                        <input type="text" id="check-student" placeholder="1234567890">
+                    </div>
+                    <div class="form-group">
+                        <label>Threshold (%)</label>
+                        <input type="text" id="check-threshold" value="40">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Code to Check</label>
+                    <textarea id="check-code" placeholder="Paste code here..."></textarea>
+                </div>
+            </div>
+            <div class="button-row">
+                <button class="primary-btn" onclick="checkAgainstTag()">Check</button>
+            </div>
+            <div id="check-results"></div>
+        </div>
+
+        <!-- Batch Analysis Tab -->
+        <div id="batch-tab" class="tab-content">
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title">Compare All Submissions with a Tag</span>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Tag</label>
+                        <input type="text" id="batch-tag" placeholder="cse330-hw5">
+                    </div>
+                    <div class="form-group">
+                        <label>Threshold (%)</label>
+                        <input type="text" id="batch-threshold" value="40">
+                    </div>
+                    <div class="form-group"></div>
+                </div>
+            </div>
+            <div class="button-row">
+                <button class="primary-btn" onclick="batchAnalysis()">Analyze All Pairs</button>
+            </div>
+            <div id="batch-results"></div>
+        </div>
+
+        <!-- Manage Tags Tab -->
+        <div id="manage-tab" class="tab-content">
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title">All Tags</span>
+                </div>
+                <div id="tags-container">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <span>Loading tags...</span>
+                    </div>
+                </div>
+            </div>
+            <div id="submissions-container"></div>
+        </div>
     </div>
 
     <script>
         const API_URL = 'http://localhost:5000';
 
-        async function checkPlagiarism() {
-            const code1 = document.getElementById('code1').value.trim();
-            const code2 = document.getElementById('code2').value.trim();
-            const resultsDiv = document.getElementById('results');
-            const checkBtn = document.getElementById('checkBtn');
+        function showTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
 
-            if (!code1 || !code2) {
-                alert('Please paste code in both text boxes');
-                return;
+            event.target.classList.add('active');
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+
+            if (tabName === 'manage') {
+                loadTags();
             }
-
-            // Show loading
-            resultsDiv.classList.add('visible');
-            resultsDiv.innerHTML = `
-                <div class="loading">
-                    <div class="spinner"></div>
-                    <span>Analyzing code...</span>
-                </div>
-            `;
-            checkBtn.disabled = true;
-
-            try {
-                const response = await fetch(`${API_URL}/api/check`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ code1, code2 })
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Server error: ${response.status}`);
-                }
-
-                const data = await response.json();
-                displayResults(data);
-
-            } catch (error) {
-                resultsDiv.innerHTML = `
-                    <div class="error">
-                        <strong>Error:</strong> ${error.message}<br>
-                        <small>Make sure the backend server is running on ${API_URL}</small>
-                    </div>
-                `;
-            } finally {
-                checkBtn.disabled = false;
-            }
-        }
-
-        function displayResults(data) {
-            const resultsDiv = document.getElementById('results');
-            const level = data.verdict.level;
-
-            resultsDiv.innerHTML = `
-                <div class="score-display">
-                    <div class="score-circle score-${level}">${data.score}%</div>
-                    <div class="verdict">${data.verdict.text}</div>
-                    <div class="verdict-desc">${data.verdict.description}</div>
-
-                    <div class="stats">
-                        <div class="stat">
-                            <div class="stat-value">${data.stats.original_lines.code1}</div>
-                            <div class="stat-label">Lines (Sample 1)</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-value">${data.stats.original_lines.code2}</div>
-                            <div class="stat-label">Lines (Sample 2)</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-value">${data.stats.normalized_lines.code1}</div>
-                            <div class="stat-label">Normalized Lines</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="details-grid">
-                    <div class="detail-section">
-                        <h3>Normalized Code 1</h3>
-                        <div class="normalized-code">${escapeHtml(data.normalized.code1)}</div>
-                    </div>
-                    <div class="detail-section">
-                        <h3>Normalized Code 2</h3>
-                        <div class="normalized-code">${escapeHtml(data.normalized.code2)}</div>
-                    </div>
-                </div>
-
-                ${data.suspicious && (data.suspicious.identical_strings.length > 0 || data.suspicious.identical_blocks.length > 0) ? `
-                    <div class="detail-section suspicious-section" style="margin-top: 1.5rem;">
-                        <h3>🚨 Suspicious Patterns Found</h3>
-
-                        ${data.suspicious.identical_strings.length > 0 ? `
-                            <div class="suspicious-group">
-                                <h4>Identical String Literals (${data.suspicious.string_count} total)</h4>
-                                <div class="suspicious-items">
-                                    ${data.suspicious.identical_strings.map(s => `<code class="suspicious-string">${escapeHtml(s)}</code>`).join('')}
-                                </div>
-                            </div>
-                        ` : ''}
-
-                        ${data.suspicious.identical_blocks.length > 0 ? `
-                            <div class="suspicious-group">
-                                <h4>Identical Code Blocks (${data.suspicious.block_count} total)</h4>
-                                ${data.suspicious.identical_blocks.map(b => `<pre class="suspicious-block">${escapeHtml(b)}</pre>`).join('')}
-                            </div>
-                        ` : ''}
-                    </div>
-                ` : ''}
-
-                ${data.diff.length > 0 ? `
-                    <div class="detail-section" style="margin-top: 1.5rem;">
-                        <h3>Diff of Normalized Code</h3>
-                        <pre class="diff-view">${data.diff.map(line => {
-                            if (line.startsWith('+++') || line.startsWith('---')) {
-                                return '<span class="diff-header">' + escapeHtml(line) + '</span>';
-                            } else if (line.startsWith('@@')) {
-                                return '<span class="diff-range">' + escapeHtml(line) + '</span>';
-                            } else if (line.startsWith('+')) {
-                                return '<span class="diff-add">' + escapeHtml(line) + '</span>';
-                            } else if (line.startsWith('-')) {
-                                return '<span class="diff-remove">' + escapeHtml(line) + '</span>';
-                            } else {
-                                return '<span class="diff-context">' + escapeHtml(line) + '</span>';
-                            }
-                        }).join('\n')}</pre>
-                    </div>
-                ` : '<div class="detail-section" style="margin-top: 1.5rem;"><h3>Diff</h3><p style="color: #a1a1aa;">No differences found — code is identical after normalization.</p></div>'}
-            `;
         }
 
         function escapeHtml(text) {
@@ -542,46 +581,344 @@
             return div.innerHTML;
         }
 
-        function clearAll() {
-            document.getElementById('code1').value = '';
-            document.getElementById('code2').value = '';
-            document.getElementById('results').classList.remove('visible');
+        function getBadgeClass(level) {
+            return {
+                'critical': 'badge-critical',
+                'high': 'badge-high',
+                'medium': 'badge-medium',
+                'low': 'badge-low',
+                'none': 'badge-low'
+            }[level] || 'badge-low';
         }
 
-        // Load sample code
-        document.getElementById('code1').value = `// Calculate sum of array
-#include <iostream>
+        // Quick Compare
+        async function quickCompare() {
+            const code1 = document.getElementById('code1').value.trim();
+            const code2 = document.getElementById('code2').value.trim();
+            const resultsDiv = document.getElementById('compare-results');
 
-int calculateSum(int numbers[], int size) {
-    int total = 0;
-    for (int i = 0; i < size; i++) {
-        total += numbers[i];
-    }
-    return total;
-}
+            if (!code1 || !code2) {
+                resultsDiv.innerHTML = '<div class="error-msg">Please paste code in both text boxes</div>';
+                return;
+            }
 
-int main() {
-    int arr[] = {1, 2, 3, 4, 5};
-    std::cout << calculateSum(arr, 5) << std::endl;
-    return 0;
-}`;
+            resultsDiv.innerHTML = '<div class="loading"><div class="spinner"></div><span>Comparing...</span></div>';
 
-        document.getElementById('code2').value = `// Add up array elements
-#include <iostream>
+            try {
+                const response = await fetch(`${API_URL}/api/check`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code1, code2 })
+                });
 
-int computeTotal(int arr[], int len) {
-    int sum = 0;
-    for (int idx = 0; idx < len; idx++) {
-        sum += arr[idx];
-    }
-    return sum;
-}
+                const data = await response.json();
 
-int main() {
-    int data[] = {10, 20, 30, 40, 50};
-    std::cout << computeTotal(data, 5) << std::endl;
-    return 0;
-}`;
+                if (data.error) {
+                    resultsDiv.innerHTML = `<div class="error-msg">${data.error}</div>`;
+                    return;
+                }
+
+                resultsDiv.innerHTML = `
+                    <div class="results">
+                        <div class="score-display">
+                            <div class="score-circle score-${data.verdict.level}">${data.score}%</div>
+                            <div class="verdict">${data.verdict.text}</div>
+                            <p style="color: #a1a1aa; margin-top: 0.5rem;">${data.verdict.description}</p>
+                        </div>
+
+                        ${data.suspicious && data.suspicious.identical_strings.length > 0 ? `
+                            <div class="detail-section" style="background: rgba(248,113,113,0.1); border: 1px solid #f87171;">
+                                <h3 style="color: #f87171;">🚨 Suspicious: ${data.suspicious.string_count} identical strings found</h3>
+                                <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                                    ${data.suspicious.identical_strings.map(s => `<code style="background:#313244;padding:0.25rem 0.5rem;border-radius:4px;font-size:11px;">${escapeHtml(s)}</code>`).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+
+                        <div class="detail-section">
+                            <h3>Diff of Normalized Code</h3>
+                            <pre class="diff-view">${data.diff.length > 0 ? data.diff.map(line => {
+                                if (line.startsWith('+')) return `<span class="diff-add">${escapeHtml(line)}</span>`;
+                                if (line.startsWith('-')) return `<span class="diff-remove">${escapeHtml(line)}</span>`;
+                                return `<span class="diff-context">${escapeHtml(line)}</span>`;
+                            }).join('\n') : 'No differences - code is identical after normalization.'}</pre>
+                        </div>
+                    </div>
+                `;
+
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="error-msg">Error: ${error.message}. Is the server running?</div>`;
+            }
+        }
+
+        function clearCompare() {
+            document.getElementById('code1').value = '';
+            document.getElementById('code2').value = '';
+            document.getElementById('compare-results').innerHTML = '';
+        }
+
+        // Submit Code
+        async function submitCode() {
+            const code = document.getElementById('submit-code').value.trim();
+            const tag = document.getElementById('submit-tag').value.trim();
+            const student_id = document.getElementById('submit-student').value.trim();
+            const filename = document.getElementById('submit-filename').value.trim();
+            const resultsDiv = document.getElementById('submit-results');
+
+            if (!code || !tag) {
+                resultsDiv.innerHTML = '<div class="error-msg">Code and tag are required</div>';
+                return;
+            }
+
+            resultsDiv.innerHTML = '<div class="loading"><div class="spinner"></div><span>Submitting...</span></div>';
+
+            try {
+                const response = await fetch(`${API_URL}/api/submit`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code, tag, student_id, filename })
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    resultsDiv.innerHTML = `<div class="error-msg">${data.error}</div>`;
+                } else {
+                    resultsDiv.innerHTML = `<div class="success-msg">✓ ${data.message} (ID: ${data.submission_id})</div>`;
+                    document.getElementById('submit-code').value = '';
+                }
+
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="error-msg">Error: ${error.message}</div>`;
+            }
+        }
+
+        // Check Against Tag
+        async function checkAgainstTag() {
+            const code = document.getElementById('check-code').value.trim();
+            const tag = document.getElementById('check-tag').value.trim();
+            const student_id = document.getElementById('check-student').value.trim();
+            const threshold = parseFloat(document.getElementById('check-threshold').value) / 100;
+            const resultsDiv = document.getElementById('check-results');
+
+            if (!code || !tag) {
+                resultsDiv.innerHTML = '<div class="error-msg">Code and tag are required</div>';
+                return;
+            }
+
+            resultsDiv.innerHTML = '<div class="loading"><div class="spinner"></div><span>Checking...</span></div>';
+
+            try {
+                const response = await fetch(`${API_URL}/api/check_against_tag`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code, tag, student_id, threshold })
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    resultsDiv.innerHTML = `<div class="error-msg">${data.error}</div>`;
+                    return;
+                }
+
+                resultsDiv.innerHTML = `
+                    <div class="results">
+                        <div class="info-box">
+                            <h4>Results for tag: ${data.tag}</h4>
+                            <p>Compared against ${data.total_compared} submissions. Found ${data.flagged_count} matches above ${data.threshold}% threshold.</p>
+                        </div>
+
+                        ${data.matches.length > 0 ? `
+                            <table class="match-table">
+                                <thead>
+                                    <tr>
+                                        <th>Student ID</th>
+                                        <th>Filename</th>
+                                        <th>Similarity</th>
+                                        <th>Verdict</th>
+                                        <th>Submitted</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${data.matches.map(m => `
+                                        <tr>
+                                            <td>${escapeHtml(m.student_id)}</td>
+                                            <td>${escapeHtml(m.filename)}</td>
+                                            <td><span class="score-badge ${getBadgeClass(m.verdict.level)}">${m.score}%</span></td>
+                                            <td>${m.verdict.text}</td>
+                                            <td>${new Date(m.submitted_at).toLocaleString()}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        ` : '<p style="color:#a1a1aa;padding:1rem;">No matches found above threshold.</p>'}
+                    </div>
+                `;
+
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="error-msg">Error: ${error.message}</div>`;
+            }
+        }
+
+        // Batch Analysis
+        async function batchAnalysis() {
+            const tag = document.getElementById('batch-tag').value.trim();
+            const threshold = parseFloat(document.getElementById('batch-threshold').value) / 100;
+            const resultsDiv = document.getElementById('batch-results');
+
+            if (!tag) {
+                resultsDiv.innerHTML = '<div class="error-msg">Tag is required</div>';
+                return;
+            }
+
+            resultsDiv.innerHTML = '<div class="loading"><div class="spinner"></div><span>Analyzing all pairs...</span></div>';
+
+            try {
+                const response = await fetch(`${API_URL}/api/check_all_pairs`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ tag, threshold })
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    resultsDiv.innerHTML = `<div class="error-msg">${data.error}</div>`;
+                    return;
+                }
+
+                resultsDiv.innerHTML = `
+                    <div class="results">
+                        <div class="info-box">
+                            <h4>Batch Analysis for: ${data.tag}</h4>
+                            <p>${data.total_submissions} submissions, ${data.total_pairs_checked} pairs checked.
+                               <strong style="color: ${data.flagged_count > 0 ? '#f87171' : '#4ade80'}">
+                                   ${data.flagged_count} flagged pairs
+                               </strong> above ${data.threshold}% threshold.</p>
+                        </div>
+
+                        ${data.pairs.length > 0 ? `
+                            <table class="match-table">
+                                <thead>
+                                    <tr>
+                                        <th>Student 1</th>
+                                        <th>Student 2</th>
+                                        <th>Similarity</th>
+                                        <th>Verdict</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${data.pairs.map(p => `
+                                        <tr>
+                                            <td>${escapeHtml(p.student1.id)}<br><small style="color:#a1a1aa">${escapeHtml(p.student1.filename)}</small></td>
+                                            <td>${escapeHtml(p.student2.id)}<br><small style="color:#a1a1aa">${escapeHtml(p.student2.filename)}</small></td>
+                                            <td><span class="score-badge ${getBadgeClass(p.verdict.level)}">${p.score}%</span></td>
+                                            <td>${p.verdict.text}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        ` : '<p style="color:#4ade80;padding:1rem;">✓ No suspicious pairs found!</p>'}
+                    </div>
+                `;
+
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="error-msg">Error: ${error.message}</div>`;
+            }
+        }
+
+        // Load Tags
+        async function loadTags() {
+            const container = document.getElementById('tags-container');
+
+            try {
+                const response = await fetch(`${API_URL}/api/tags`);
+                const data = await response.json();
+
+                if (data.tags.length === 0) {
+                    container.innerHTML = '<p style="color:#a1a1aa;">No tags yet. Submit some code first!</p>';
+                    return;
+                }
+
+                container.innerHTML = `
+                    <div class="tags-list">
+                        ${data.tags.map(t => `
+                            <div class="tag-item" onclick="loadSubmissions('${t.tag}')">
+                                <span>${escapeHtml(t.tag)}</span>
+                                <span class="tag-count">${t.count}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+
+            } catch (error) {
+                container.innerHTML = `<div class="error-msg">Error loading tags: ${error.message}</div>`;
+            }
+        }
+
+        // Load Submissions for a tag
+        async function loadSubmissions(tag) {
+            const container = document.getElementById('submissions-container');
+            container.innerHTML = '<div class="loading"><div class="spinner"></div><span>Loading submissions...</span></div>';
+
+            try {
+                const response = await fetch(`${API_URL}/api/submissions/${tag}`);
+                const data = await response.json();
+
+                container.innerHTML = `
+                    <div class="panel" style="margin-top: 1rem;">
+                        <div class="panel-header">
+                            <span class="panel-title">Submissions for: ${escapeHtml(data.tag)} (${data.count})</span>
+                        </div>
+                        <table class="match-table">
+                            <thead>
+                                <tr>
+                                    <th>Student ID</th>
+                                    <th>Filename</th>
+                                    <th>Submitted</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.submissions.map(s => `
+                                    <tr id="row-${s.id}">
+                                        <td>${escapeHtml(s.student_id)}</td>
+                                        <td>${escapeHtml(s.filename)}</td>
+                                        <td>${new Date(s.submitted_at).toLocaleString()}</td>
+                                        <td>
+                                            <button class="secondary-btn" style="padding:0.25rem 0.5rem;font-size:0.8rem" onclick="deleteSubmission('${s.id}')">Delete</button>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+
+            } catch (error) {
+                container.innerHTML = `<div class="error-msg">Error: ${error.message}</div>`;
+            }
+        }
+
+        // Delete submission
+        async function deleteSubmission(id) {
+            if (!confirm('Are you sure you want to delete this submission?')) return;
+
+            try {
+                const response = await fetch(`${API_URL}/api/submission/${id}`, { method: 'DELETE' });
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById(`row-${id}`).remove();
+                    loadTags();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
     </script>
 </body>
 </html>

@@ -1,6 +1,7 @@
 """
 Plagiarism Checker Backend
 Flask server that normalizes and compares C++ code using Tree-sitter
+With MongoDB storage for batch comparison by tag
 """
 
 from flask import Flask, request, jsonify
@@ -8,9 +9,24 @@ from flask_cors import CORS
 import tree_sitter_cpp as tscpp
 from tree_sitter import Language, Parser
 from difflib import SequenceMatcher
+from pymongo import MongoClient
+from bson.objectid import ObjectId
+from datetime import datetime
+from dotenv import load_dotenv
+import os
 
 app = Flask(__name__)
 CORS(app)
+
+load_dotenv(override=True)
+
+# MongoDB setup
+MONGO_URI = os.environ.get('MONGO_URI', 'mongodb://localhost:27017')
+mongo_client = MongoClient(MONGO_URI)
+db = mongo_client['plagiarism_checker']
+submissions_collection = db['submissions']
+
+submissions_collection.create_index('tag')
 
 
 class CppNormalizer:
@@ -340,6 +356,251 @@ def normalize_code():
 def health_check():
     """Health check endpoint."""
     return jsonify({'status': 'ok'})
+
+
+# ============== MongoDB Submission Endpoints ==============
+
+@app.route('/api/submit', methods=['POST'])
+def submit_code():
+    """Submit code with a tag for storage and comparison."""
+    try:
+        data = request.get_json()
+        code = data.get('code', '')
+        tag = data.get('tag', '').strip().lower()
+        student_id = data.get('student_id', '').strip()
+        filename = data.get('filename', 'submission.cpp')
+
+        if not code or not tag:
+            return jsonify({'error': 'Code and tag are required'}), 400
+
+        # Normalize for storage
+        struct_normalized = structural_normalize(code, normalizer.parser)
+
+        # Create submission document
+        submission = {
+            'code': code,
+            'normalized': struct_normalized,
+            'tag': tag,
+            'student_id': student_id,
+            'filename': filename,
+            'submitted_at': datetime.utcnow()
+        }
+
+        result = submissions_collection.insert_one(submission)
+
+        return jsonify({
+            'success': True,
+            'submission_id': str(result.inserted_id),
+            'tag': tag,
+            'message': f'Submission stored successfully'
+        })
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/check_against_tag', methods=['POST'])
+def check_against_tag():
+    """Check code against all submissions with a specific tag."""
+    try:
+        data = request.get_json()
+        code = data.get('code', '')
+        tag = data.get('tag', '').strip().lower()
+        threshold = data.get('threshold', 0.4)  # Minimum similarity to report
+        student_id = data.get('student_id', '').strip()  # Optional: exclude self
+
+        if not code or not tag:
+            return jsonify({'error': 'Code and tag are required'}), 400
+
+        # Normalize the submitted code
+        struct_normalized = structural_normalize(code, normalizer.parser)
+
+        # Get all submissions with this tag
+        query = {'tag': tag}
+        if student_id:
+            query['student_id'] = {'$ne': student_id}  # Exclude self
+
+        submissions = list(submissions_collection.find(query))
+
+        if not submissions:
+            return jsonify({
+                'matches': [],
+                'total_compared': 0,
+                'message': f'No submissions found for tag: {tag}'
+            })
+
+        # Compare against each submission
+        matches = []
+        for sub in submissions:
+            matcher = SequenceMatcher(None, struct_normalized, sub['normalized'])
+            score = matcher.ratio()
+
+            if score >= threshold:
+                matches.append({
+                    'submission_id': str(sub['_id']),
+                    'student_id': sub.get('student_id', 'Unknown'),
+                    'filename': sub.get('filename', 'Unknown'),
+                    'score': round(score * 100, 1),
+                    'verdict': get_verdict(score),
+                    'submitted_at': sub['submitted_at'].isoformat()
+                })
+
+        # Sort by score descending
+        matches.sort(key=lambda x: x['score'], reverse=True)
+
+        return jsonify({
+            'matches': matches,
+            'total_compared': len(submissions),
+            'flagged_count': len(matches),
+            'tag': tag,
+            'threshold': threshold * 100
+        })
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/check_all_pairs', methods=['POST'])
+def check_all_pairs():
+    """Check all submissions with a tag against each other."""
+    try:
+        data = request.get_json()
+        tag = data.get('tag', '').strip().lower()
+        threshold = data.get('threshold', 0.4)
+
+        if not tag:
+            return jsonify({'error': 'Tag is required'}), 400
+
+        submissions = list(submissions_collection.find({'tag': tag}))
+
+        if len(submissions) < 2:
+            return jsonify({
+                'pairs': [],
+                'total_submissions': len(submissions),
+                'message': 'Need at least 2 submissions to compare'
+            })
+
+        # Compare all pairs
+        flagged_pairs = []
+        for i in range(len(submissions)):
+            for j in range(i + 1, len(submissions)):
+                sub1 = submissions[i]
+                sub2 = submissions[j]
+
+                matcher = SequenceMatcher(None, sub1['normalized'], sub2['normalized'])
+                score = matcher.ratio()
+
+                if score >= threshold:
+                    flagged_pairs.append({
+                        'student1': {
+                            'id': sub1.get('student_id', 'Unknown'),
+                            'filename': sub1.get('filename', 'Unknown'),
+                            'submission_id': str(sub1['_id'])
+                        },
+                        'student2': {
+                            'id': sub2.get('student_id', 'Unknown'),
+                            'filename': sub2.get('filename', 'Unknown'),
+                            'submission_id': str(sub2['_id'])
+                        },
+                        'score': round(score * 100, 1),
+                        'verdict': get_verdict(score)
+                    })
+
+        # Sort by score descending
+        flagged_pairs.sort(key=lambda x: x['score'], reverse=True)
+
+        return jsonify({
+            'pairs': flagged_pairs,
+            'total_submissions': len(submissions),
+            'total_pairs_checked': len(submissions) * (len(submissions) - 1) // 2,
+            'flagged_count': len(flagged_pairs),
+            'tag': tag,
+            'threshold': threshold * 100
+        })
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/tags', methods=['GET'])
+def get_tags():
+    """Get all unique tags with submission counts."""
+    try:
+        pipeline = [
+            {'$group': {'_id': '$tag', 'count': {'$sum': 1}}},
+            {'$sort': {'_id': 1}}
+        ]
+        tags = list(submissions_collection.aggregate(pipeline))
+
+        return jsonify({
+            'tags': [{'tag': t['_id'], 'count': t['count']} for t in tags]
+        })
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/submissions/<tag>', methods=['GET'])
+def get_submissions_by_tag(tag):
+    """Get all submissions for a specific tag."""
+    try:
+        tag = tag.strip().lower()
+        submissions = list(submissions_collection.find(
+            {'tag': tag},
+            {'code': 0, 'normalized': 0}  # Exclude large fields
+        ).sort('submitted_at', -1))
+
+        return jsonify({
+            'submissions': [{
+                'id': str(s['_id']),
+                'student_id': s.get('student_id', 'Unknown'),
+                'filename': s.get('filename', 'Unknown'),
+                'submitted_at': s['submitted_at'].isoformat()
+            } for s in submissions],
+            'tag': tag,
+            'count': len(submissions)
+        })
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/submission/<submission_id>', methods=['GET'])
+def get_submission(submission_id):
+    """Get a specific submission by ID."""
+    try:
+        submission = submissions_collection.find_one({'_id': ObjectId(submission_id)})
+
+        if not submission:
+            return jsonify({'error': 'Submission not found'}), 404
+
+        return jsonify({
+            'id': str(submission['_id']),
+            'code': submission['code'],
+            'normalized': submission['normalized'],
+            'tag': submission['tag'],
+            'student_id': submission.get('student_id', 'Unknown'),
+            'filename': submission.get('filename', 'Unknown'),
+            'submitted_at': submission['submitted_at'].isoformat()
+        })
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/submission/<submission_id>', methods=['DELETE'])
+def delete_submission(submission_id):
+    """Delete a specific submission."""
+    try:
+        result = submissions_collection.delete_one({'_id': ObjectId(submission_id)})
+
+        if result.deleted_count == 0:
+            return jsonify({'error': 'Submission not found'}), 404
+
+        return jsonify({'success': True, 'message': 'Submission deleted'})
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 
 if __name__ == '__main__':
