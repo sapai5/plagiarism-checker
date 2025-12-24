@@ -8,7 +8,7 @@ The tool parses C++ code into an Abstract Syntax Tree, then normalizes it by rep
 
 ```cpp
 // Original                                  // "Disguised" copy
-map<string, vector<Obj>> xyz;          map<string, vector<Object>> zyx;
+map<string, vector<Obj>> xyz;                map<string, vector<Object>> zyx;
 for (const auto& rule : rules) {             for (const auto& r : rules) {
     xyz[rule.left].push_back(rule);          zyx[r.left].push_back(r);
 }                                            }
