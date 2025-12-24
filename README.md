@@ -38,23 +38,31 @@ Similarity is calculated using SequenceMatcher on the normalized code.
 - MongoDB
 
 ### Setup
-
 ```bash
 # Clone the repo
-git clone https://github.com/yourusername/plagiarism-checker.git
+git clone https://github.com/sapai5/plagiarism-checker.git
 cd plagiarism-checker
 
 # Install dependencies
 pip install flask flask-cors tree-sitter tree-sitter-cpp pymongo python-dotenv dnspython
 
-# Start MongoDB (if not running)
-mongod
+# Set up MongoDB Atlas connection (create a .env file)
+echo "MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net/?appName=your-app" > .env
 
 # Run the server
 python server.py
 ```
 
 Open `frontend.html` in your browser.
+
+### Environment Variables
+
+Create a `.env` file in the project root:
+```
+MONGO_URI=mongodb+srv://username:password@your-cluster.mongodb.net/?appName=your-app
+```
+
+Get your connection string from [MongoDB Atlas](https://www.mongodb.com/atlas) → Database → Connect → Drivers → Python.
 
 ### Environment Variables
 
