@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Plagiarism Checker</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            padding: 2rem;
+            color: #e4e4e7;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 0.5rem;
+            font-size: 2rem;
+            background: linear-gradient(90deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #a1a1aa;
+            margin-bottom: 2rem;
+        }
+
+        .code-panels {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (max-width: 900px) {
+            .code-panels {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background: #1e1e2e;
+            border-radius: 12px;
+            padding: 1rem;
+            border: 1px solid #313244;
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid #313244;
+        }
+
+        .panel-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .panel:first-child .panel-dot { background: #f472b6; }
+        .panel:last-child .panel-dot { background: #34d399; }
+
+        .panel-title {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        textarea {
+            width: 100%;
+            height: 300px;
+            background: #11111b;
+            border: 1px solid #313244;
+            border-radius: 8px;
+            padding: 1rem;
+            color: #cdd6f4;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+            resize: vertical;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #60a5fa;
+        }
+
+        .button-row {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        button {
+            padding: 0.875rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .check-btn {
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            color: white;
+        }
+
+        .check-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(96, 165, 250, 0.4);
+        }
+
+        .check-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .clear-btn {
+            background: #313244;
+            color: #cdd6f4;
+        }
+
+        .clear-btn:hover {
+            background: #45475a;
+        }
+
+        .results {
+            background: #1e1e2e;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid #313244;
+            display: none;
+        }
+
+        .results.visible {
+            display: block;
+        }
+
+        .score-display {
+            text-align: center;
+            padding: 2rem;
+            border-bottom: 1px solid #313244;
+            margin-bottom: 1.5rem;
+        }
+
+        .score-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+
+        .score-critical { background: linear-gradient(135deg, #dc2626, #f87171); }
+        .score-high { background: linear-gradient(135deg, #ea580c, #fb923c); }
+        .score-medium { background: linear-gradient(135deg, #ca8a04, #facc15); color: #1e1e2e; }
+        .score-low { background: linear-gradient(135deg, #16a34a, #4ade80); color: #1e1e2e; }
+        .score-none { background: linear-gradient(135deg, #0d9488, #2dd4bf); color: #1e1e2e; }
+
+        .verdict {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .verdict-desc {
+            color: #a1a1aa;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 900px) {
+            .details-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .detail-section {
+            background: #11111b;
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .detail-section h3 {
+            font-size: 0.9rem;
+            color: #a1a1aa;
+            margin-bottom: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .normalized-code {
+            font-family: 'Fira Code', monospace;
+            font-size: 12px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            max-height: 250px;
+            overflow-y: auto;
+            color: #89b4fa;
+        }
+
+        .diff-view {
+            background: #11111b;
+            padding: 1rem;
+            margin: 0;
+            border-radius: 6px;
+            font-family: 'Fira Code', monospace;
+            font-size: 12px;
+            line-height: 1.6;
+            overflow-x: auto;
+            white-space: pre;
+        }
+
+        .diff-header {
+            color: #cdd6f4;
+            font-weight: bold;
+        }
+
+        .diff-range {
+            color: #89b4fa;
+        }
+
+        .diff-add {
+            color: #a6e3a1;
+            background: rgba(166, 227, 161, 0.1);
+            display: block;
+        }
+
+        .diff-remove {
+            color: #f38ba8;
+            background: rgba(243, 139, 168, 0.1);
+            display: block;
+        }
+
+        .diff-context {
+            color: #6c7086;
+        }
+
+        .suspicious-section {
+            background: rgba(248, 113, 113, 0.1);
+            border: 1px solid #f87171;
+        }
+
+        .suspicious-section h3 {
+            color: #f87171;
+            margin-bottom: 1rem;
+        }
+
+        .suspicious-group {
+            margin-bottom: 1rem;
+        }
+
+        .suspicious-group h4 {
+            color: #fca5a5;
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .suspicious-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .suspicious-string {
+            background: #313244;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 11px;
+            color: #f9e2af;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .suspicious-block {
+            background: #1e1e2e;
+            padding: 0.75rem;
+            border-radius: 6px;
+            font-size: 11px;
+            margin-bottom: 0.5rem;
+            overflow-x: auto;
+            border-left: 3px solid #f87171;
+        }
+
+        .stats {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #313244;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #60a5fa;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #a1a1aa;
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            padding: 2rem;
+            color: #a1a1aa;
+        }
+
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid #313244;
+            border-top-color: #60a5fa;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #f871711a;
+            border: 1px solid #f87171;
+            color: #fca5a5;
+            padding: 1rem;
+            border-radius: 8px;
+        }
+
+        .toggle-btn {
+            background: #313244;
+            color: #cdd6f4;
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Code Plagiarism Checker</h1>
+        <p class="subtitle">Paste two C++ code samples to analyze structural similarity</p>
+
+        <div class="code-panels">
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-dot"></div>
+                    <span class="panel-title">Code Sample 1</span>
+                </div>
+                <textarea id="code1" placeholder="Paste first code sample here..."></textarea>
+            </div>
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-dot"></div>
+                    <span class="panel-title">Code Sample 2</span>
+                </div>
+                <textarea id="code2" placeholder="Paste second code sample here..."></textarea>
+            </div>
+        </div>
+
+        <div class="button-row">
+            <button class="check-btn" id="checkBtn" onclick="checkPlagiarism()">
+                Check for Plagiarism
+            </button>
+            <button class="clear-btn" onclick="clearAll()">Clear All</button>
+        </div>
+
+        <div class="results" id="results"></div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:5000';
+
+        async function checkPlagiarism() {
+            const code1 = document.getElementById('code1').value.trim();
+            const code2 = document.getElementById('code2').value.trim();
+            const resultsDiv = document.getElementById('results');
+            const checkBtn = document.getElementById('checkBtn');
+
+            if (!code1 || !code2) {
+                alert('Please paste code in both text boxes');
+                return;
+            }
+
+            // Show loading
+            resultsDiv.classList.add('visible');
+            resultsDiv.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <span>Analyzing code...</span>
+                </div>
+            `;
+            checkBtn.disabled = true;
+
+            try {
+                const response = await fetch(`${API_URL}/api/check`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code1, code2 })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Server error: ${response.status}`);
+                }
+
+                const data = await response.json();
+                displayResults(data);
+
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <div class="error">
+                        <strong>Error:</strong> ${error.message}<br>
+                        <small>Make sure the backend server is running on ${API_URL}</small>
+                    </div>
+                `;
+            } finally {
+                checkBtn.disabled = false;
+            }
+        }
+
+        function displayResults(data) {
+            const resultsDiv = document.getElementById('results');
+            const level = data.verdict.level;
+
+            resultsDiv.innerHTML = `
+                <div class="score-display">
+                    <div class="score-circle score-${level}">${data.score}%</div>
+                    <div class="verdict">${data.verdict.text}</div>
+                    <div class="verdict-desc">${data.verdict.description}</div>
+
+                    <div class="stats">
+                        <div class="stat">
+                            <div class="stat-value">${data.stats.original_lines.code1}</div>
+                            <div class="stat-label">Lines (Sample 1)</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">${data.stats.original_lines.code2}</div>
+                            <div class="stat-label">Lines (Sample 2)</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">${data.stats.normalized_lines.code1}</div>
+                            <div class="stat-label">Normalized Lines</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="details-grid">
+                    <div class="detail-section">
+                        <h3>Normalized Code 1</h3>
+                        <div class="normalized-code">${escapeHtml(data.normalized.code1)}</div>
+                    </div>
+                    <div class="detail-section">
+                        <h3>Normalized Code 2</h3>
+                        <div class="normalized-code">${escapeHtml(data.normalized.code2)}</div>
+                    </div>
+                </div>
+
+                ${data.suspicious && (data.suspicious.identical_strings.length > 0 || data.suspicious.identical_blocks.length > 0) ? `
+                    <div class="detail-section suspicious-section" style="margin-top: 1.5rem;">
+                        <h3>🚨 Suspicious Patterns Found</h3>
+
+                        ${data.suspicious.identical_strings.length > 0 ? `
+                            <div class="suspicious-group">
+                                <h4>Identical String Literals (${data.suspicious.string_count} total)</h4>
+                                <div class="suspicious-items">
+                                    ${data.suspicious.identical_strings.map(s => `<code class="suspicious-string">${escapeHtml(s)}</code>`).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+
+                        ${data.suspicious.identical_blocks.length > 0 ? `
+                            <div class="suspicious-group">
+                                <h4>Identical Code Blocks (${data.suspicious.block_count} total)</h4>
+                                ${data.suspicious.identical_blocks.map(b => `<pre class="suspicious-block">${escapeHtml(b)}</pre>`).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                ` : ''}
+
+                ${data.diff.length > 0 ? `
+                    <div class="detail-section" style="margin-top: 1.5rem;">
+                        <h3>Diff of Normalized Code</h3>
+                        <pre class="diff-view">${data.diff.map(line => {
+                            if (line.startsWith('+++') || line.startsWith('---')) {
+                                return '<span class="diff-header">' + escapeHtml(line) + '</span>';
+                            } else if (line.startsWith('@@')) {
+                                return '<span class="diff-range">' + escapeHtml(line) + '</span>';
+                            } else if (line.startsWith('+')) {
+                                return '<span class="diff-add">' + escapeHtml(line) + '</span>';
+                            } else if (line.startsWith('-')) {
+                                return '<span class="diff-remove">' + escapeHtml(line) + '</span>';
+                            } else {
+                                return '<span class="diff-context">' + escapeHtml(line) + '</span>';
+                            }
+                        }).join('\n')}</pre>
+                    </div>
+                ` : '<div class="detail-section" style="margin-top: 1.5rem;"><h3>Diff</h3><p style="color: #a1a1aa;">No differences found — code is identical after normalization.</p></div>'}
+            `;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function clearAll() {
+            document.getElementById('code1').value = '';
+            document.getElementById('code2').value = '';
+            document.getElementById('results').classList.remove('visible');
+        }
+
+        // Load sample code
+        document.getElementById('code1').value = `// Calculate sum of array
+#include <iostream>
+
+int calculateSum(int numbers[], int size) {
+    int total = 0;
+    for (int i = 0; i < size; i++) {
+        total += numbers[i];
+    }
+    return total;
+}
+
+int main() {
+    int arr[] = {1, 2, 3, 4, 5};
+    std::cout << calculateSum(arr, 5) << std::endl;
+    return 0;
+}`;
+
+        document.getElementById('code2').value = `// Add up array elements
+#include <iostream>
+
+int computeTotal(int arr[], int len) {
+    int sum = 0;
+    for (int idx = 0; idx < len; idx++) {
+        sum += arr[idx];
+    }
+    return sum;
+}
+
+int main() {
+    int data[] = {10, 20, 30, 40, 50};
+    std::cout << computeTotal(data, 5) << std::endl;
+    return 0;
+}`;
+    </script>
+</body>
+</html>
