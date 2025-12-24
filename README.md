@@ -165,4 +165,4 @@ DELETE /api/submission/<submission_id>
 
 ## License
 
-MIT
+Sahil Pai
