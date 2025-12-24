@@ -45,7 +45,7 @@ git clone https://github.com/yourusername/plagiarism-checker.git
 cd plagiarism-checker
 
 # Install dependencies
-pip install -r requirements.txt
+pip install flask flask-cors tree-sitter tree-sitter-cpp pymongo python-dotenv dnspython
 
 # Start MongoDB (if not running)
 mongod
